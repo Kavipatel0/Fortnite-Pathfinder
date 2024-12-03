@@ -1,5 +1,5 @@
 import Map from './Map';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, Trash2, Check } from 'lucide-react';
 import {Graph} from './Graph.js';
 import Papa from "papaparse"
@@ -13,6 +13,8 @@ function App() {
   const [path, setPath] = useState([]);
   const [isPathfinding, setIsPathfinding] = useState(false);
   const [isShowingFinalPath, setIsShowingFinalPath] = useState(false);
+  const [animationSpeed, setAnimationSpeed] = useState(2);
+
 
 
   const readCSV = async () => {
@@ -81,6 +83,11 @@ function App() {
     return [[startPosition.x, startPosition.y], [endPosition.x, endPosition.y]];
   };
 
+  const speedRef = useRef(animationSpeed);
+  useEffect(() => {
+    speedRef.current = animationSpeed;
+  }, [animationSpeed]);
+
   const runPathfinding = () => {
     if (!graph || !startPosition || !endPosition || isPathfinding) return;
   
@@ -106,8 +113,18 @@ function App() {
         let currentPath = [];
         let i = 0;
         
+        const getCellsPerFrame = (speed) => {
+          switch(speed) {
+            case 1: return 15;  // Slow
+            case 2: return 25;  // Medium
+            case 3: return 40; // Fast
+            default: return 40;
+          }
+        };
+  
         const timer = setInterval(() => {
-          for (let j = 0; j < 15 && i < visitedCells.length; j++) {
+          const cellsPerFrame = getCellsPerFrame(speedRef.current);
+          for (let j = 0; j < cellsPerFrame && i < visitedCells.length; j++) {
             currentPath.push(visitedCells[i]);
             i++;
           }
@@ -121,7 +138,7 @@ function App() {
               setIsPathfinding(false);
             }, 100);
           }
-        }, 1); 
+        }, 1);
       }
     }
   };
@@ -242,6 +259,28 @@ function App() {
                 A* Search
               </li>
             </ul>
+          </div>
+
+          {/* Speed Section */}
+          <h2 className="bg-gray-800 h-12 flex items-center justify-center text-3xl font-bold text-yellow-400 tracking-wider drop-shadow-md">
+            Algorithm Speed
+          </h2>
+          <div className="p-4">
+            <div className="flex flex-col items-center w-full">
+              <input
+                type="range"
+                min="1"
+                max="3"
+                value={animationSpeed}
+                onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
+                className="custom-slider w-4/5"
+              />
+              <div className="flex justify-between px-1 w-5/6 mt-2">
+                <span className="text-gray-800 tracking-wider">Slow</span>
+                <span className="text-gray-800 tracking-wider">Medium</span>
+                <span className="text-gray-800 tracking-wider">Fast</span>
+              </div>
+            </div>
           </div>
 
           {/* Run Route Section */}

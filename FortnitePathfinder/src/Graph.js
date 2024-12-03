@@ -10,7 +10,7 @@ class Graph {
       let row = [];
       for (let j = 0; j < n; j++) {
         // default value of 5, grass
-        row.push(5);
+        row.push(20);
       } 
       this.graph.push(row);
     }

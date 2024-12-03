@@ -8,7 +8,7 @@ function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], i
   const containerRef = useRef(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const GRID_SIZE = 400;
-  const CELL_SCALE = 1.3;
+  const CELL_SCALE = 1;
 
   useEffect(() => {
     if (!canvasRef.current || !imgRef.current) return;
@@ -30,7 +30,7 @@ function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], i
             if (Array.isArray(coord) && coord.length === 2) {
                 const [x, y] = coord;
                 // Use blue for final path, yellow for visited cells during animation
-                const color = isShowingFinalPath ? 'rgba(0, 0, 255, 0.4)' : 'rgba(255, 255, 0, 0.3)';
+                const color = isShowingFinalPath ? 'rgba(0, 0, 255, 1)' : 'rgba(157, 77, 187, 0.7)';
                 markCellOnCanvas(ctx, x, y, width, color);
             }
         });
