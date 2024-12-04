@@ -1,14 +1,30 @@
-import fortniteMap from './assets/FortniteMap.jpg';
+import fortniteMap1 from './assets/FortniteMap1.jpg';
+import fortniteMap2 from './assets/FortniteMap2.jpg';
+import fortniteMap3 from './assets/FortniteMap3.jpg';
+
 import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 
-function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], isShowingFinalPath = false }) {
+function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], isShowingFinalPath = false, mapNumber }) {
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
   const containerRef = useRef(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const GRID_SIZE = 400;
   const CELL_SCALE = 1;
+
+  const getMapImage = () => {
+    switch (mapNumber) {
+      case 1:
+        return fortniteMap1;
+      case 2:
+        return fortniteMap2;
+      case 3:
+        return fortniteMap3;
+      default:
+        return fortniteMap1; 
+    }
+  };
 
   useEffect(() => {
     if (!canvasRef.current || !imgRef.current) return;
@@ -98,7 +114,7 @@ function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], i
           >
               <img 
                   ref={imgRef}
-                  src={fortniteMap} 
+                  src={getMapImage()} 
                   alt="Fortnite Map" 
                   className="aspect-square w-full h-auto"
                   onLoad={handleImageLoad}

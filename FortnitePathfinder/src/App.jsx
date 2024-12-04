@@ -8,6 +8,9 @@ import battlebusAnimation from "./assets/Battle Bus Video.mp4";
 import errorIcon from "./assets/Error Icon.png";
 import topRect from "./assets/Rectangle Top.png";
 import bottomRect from "./assets/Rectangle Bottom.png";
+import fortniteMap1 from './assets/FortniteMap1.jpg';
+import fortniteMap2 from './assets/FortniteMap2.jpg';
+import fortniteMap3 from './assets/FortniteMap3.jpg';
 
 
 function App() {
@@ -25,6 +28,8 @@ function App() {
   const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef(null);
   const [showError, setShowError] = useState(false);
+  const [mapNumber, setMapNumber] = useState(1);
+
 
   const handleClose = () => {
     setShowError(false);
@@ -37,9 +42,22 @@ function App() {
     }, 200);
   };
 
-  const readCSV = async () => {
+  const getCSVPath = (mapNum) => {
+    switch(mapNum) {
+      case 1:
+        return '/data/FortniteMarkedData1.csv';
+      case 2:
+        return '/data/FortniteMarkedData2.csv';
+      case 3:
+        return '/data/FortniteMarkedData3.csv';
+      default:
+        return '/data/FortniteMarkedData1.csv';
+    }
+  };
+
+  const readCSV = async (mapNum) => {
     try {
-      const response = await fetch('/data/FortniteMarkedData.csv'); // CSV file path is only here.
+      const response = await fetch(getCSVPath(mapNum));
       const fileContent = await response.text();
       const results = Papa.parse(fileContent, {
         header: true,
@@ -52,13 +70,12 @@ function App() {
     }
   };
   
-
-  // Load CSV and initialize graph
   useEffect(() => {
     const initializeData = async () => {
       try {
-        const data = await readCSV();
-        console.log(data);
+        handleClearMap();
+        
+        const data = await readCSV(mapNumber);
         if (data) {
           let newGraph = new Graph(400);
           newGraph.updateGraph(data);
@@ -68,9 +85,9 @@ function App() {
         console.error('Error loading CSV data:', error);
       }
     };
-
+  
     initializeData();
-  }, []);
+  }, [mapNumber]);
 
   useEffect(() => {
     if (!notLoaded && videoRef.current) {
@@ -142,12 +159,13 @@ function App() {
       const finalPath = result[2];
       let animationFrameId;
   
+      // Pre-calculate all the batches
       const cellsPerBatch = (() => {
         const totalCells = visitedCells.length;
         switch(speedRef.current) {
-          case 1: return Math.max(15, Math.floor(totalCells / 300));  // Slow
-          case 2: return Math.max(25, Math.floor(totalCells / 200));  // Medium
-          case 3: return Math.max(80, Math.floor(totalCells / 100));  // Fast
+          case 1: return Math.max(15, Math.floor(totalCells / 700));  // Slow
+          case 2: return Math.max(25, Math.floor(totalCells / 500));  // Medium
+          case 3: return Math.max(80, Math.floor(totalCells / 300));  // Fast
           default: return 40;
         }
       })();
@@ -220,8 +238,57 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="bg-gray-200 w-64 overflow-y-auto shadow-lg flex flex-col divide-y divide-gray-200 border-r-2 border-dashed border-gray-300">
+          {/* Map Selector Section */}
+        <h2 className="bg-gray-800 h-12 flex items-center justify-center text-3xl font-bold text-yellow-400 tracking-wider drop-shadow-md">
+          MAP SELECTOR
+        </h2>
+        <div className="p-4">
+          <div className='grid grid-cols-3 gap-4'>
+            <div className={`bg-white rounded-lg h-16 aspect-square cursor-pointer hover:ring-2  transition-all shadow-md flex items-center justify-center ${
+              mapNumber === 1 
+                ? 'border-2 border-green-400 hover:ring-green-400' 
+                : 'hover:ring-blue-400'
+            }`}
+            onClick={() => setMapNumber(1)}>
+              <div className="relative">
+                <img src={fortniteMap1} className="rounded-lg" alt="Fortnite map" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white tracking-widest text-3xl">M1</span>
+                </div>
+              </div>
+            </div>
+            <div className={`bg-white rounded-lg h-16 aspect-square cursor-pointer hover:ring-2  transition-all shadow-md flex items-center justify-center ${
+              mapNumber === 2 
+                ? 'border-2 border-green-400 hover:ring-green-400' 
+                : 'hover:ring-blue-400'
+            }`}
+            onClick={() => setMapNumber(2)}>
+              <div className="relative">
+                <img src={fortniteMap2} className="rounded-lg" alt="Fortnite map" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white tracking-widest text-3xl">M2</span>
+                </div>
+              </div>
+            </div>
+            <div className={`bg-white rounded-lg h-16 aspect-square cursor-pointer hover:ring-2  transition-all shadow-md flex items-center justify-center ${
+              mapNumber === 3 
+                ? 'border-2 border-green-400 hover:ring-green-400' 
+                : 'hover:ring-blue-400'
+            }`}
+            onClick={() => setMapNumber(3)}>
+              <div className="relative">
+                <img src={fortniteMap3} className="rounded-lg" alt="Fortnite map" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white tracking-widest text-3xl">M3</span>
+                </div>
+              </div>
+            </div>
+            
+            
+          </div>
+        </div>
           {/* Map Editor Section */}
-          <h2 className="mt-3 bg-gray-800 h-12 flex items-center justify-center text-3xl font-bold text-yellow-400 tracking-wider drop-shadow-md">
+          <h2 className="bg-gray-800 h-12 flex items-center justify-center text-3xl font-bold text-yellow-400 tracking-wider drop-shadow-md">
             MAP EDITOR
           </h2>
           <div className="p-4 space-y-4">
@@ -407,6 +474,7 @@ function App() {
           activeTool={activeTool}
           path={path}
           isShowingFinalPath={isShowingFinalPath}
+          mapNumber={mapNumber}
         />
         </div>
       </div>

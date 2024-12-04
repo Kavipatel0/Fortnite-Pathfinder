@@ -3,7 +3,7 @@ import PriorityQueue from "js-priority-queue"
 class Graph {
   constructor(n) {
     this.size = n;
-    this.tileType = {"road": 1, "dirt": 2, "Grass": 3, "water": 5, "Obstacle": Infinity};
+    this.tileType = {"windtunnel": 0.2, "road": 1, "dirt": 2, "Grass": 3, "water": 5, "Obstacle": Infinity};
 
     this.graph = [];
     for (let i = 0; i < n; i++) {
