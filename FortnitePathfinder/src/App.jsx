@@ -30,7 +30,6 @@ function App() {
     setShowError(false);
   };
 
-
   const handleVideoEnd = () => {
     setFadeOut(true);
     setTimeout(() => {
@@ -40,7 +39,7 @@ function App() {
 
   const readCSV = async () => {
     try {
-      const response = await fetch('/data/FortniteMarkedData.csv');
+      const response = await fetch('/data/FortniteMarkedData.csv'); // CSV file path is only here.
       const fileContent = await response.text();
       const results = Papa.parse(fileContent, {
         header: true,
@@ -120,60 +119,77 @@ function App() {
     
     const start = [startPosition.x, startPosition.y];
     const end = [endPosition.x, endPosition.y];
-    console.log(selectedAlgorithm);
-  
+    
     let result;
     if (selectedAlgorithm === 'dijkstra') {
       result = graph.dijkstra(start, end);
-      console.log('Dijkstra Result:', result);
-    }
-    else if (selectedAlgorithm === 'astar') {
+    } else if (selectedAlgorithm === 'astar') {
       result = graph.aStar(start, end);
-      console.log('A* Result:', result);
     }
   
-    if (result) {  // Check if we have a result
+    if (result) {
       if (result[0] === -1) {
-        console.log('No path found');
         setShowError(true);
         setPath([]);
         setIsShowingFinalPath(false);
         setIsPathfinding(false);
         handleClearMap();
-      } else {
-        setPath([]);
-  
-        const visitedCells = result[1];
-        let currentPath = [];
-        let i = 0;
-        
-        const getCellsPerFrame = (speed) => {
-          switch(speed) {
-            case 1: return 15;  // Slow
-            case 2: return 25;  // Medium
-            case 3: return 80; // Fast
-            default: return 40;
-          }
-        };
-  
-        const timer = setInterval(() => {
-          const cellsPerFrame = getCellsPerFrame(speedRef.current);
-          for (let j = 0; j < cellsPerFrame && i < visitedCells.length; j++) {
-            currentPath.push(visitedCells[i]);
-            i++;
-          }
-          setPath([...currentPath]);
-          
-          if (i >= visitedCells.length) {
-            clearInterval(timer);
-            setTimeout(() => {
-              setPath(result[2]);
-              setIsShowingFinalPath(true);
-              setIsPathfinding(false);
-            }, 100);
-          }
-        }, 1);
+        return;
       }
+  
+      setPath([]);
+      const visitedCells = result[1];
+      const finalPath = result[2];
+      let animationFrameId;
+  
+      const cellsPerBatch = (() => {
+        const totalCells = visitedCells.length;
+        switch(speedRef.current) {
+          case 1: return Math.max(15, Math.floor(totalCells / 300));  // Slow
+          case 2: return Math.max(25, Math.floor(totalCells / 200));  // Medium
+          case 3: return Math.max(80, Math.floor(totalCells / 100));  // Fast
+          default: return 40;
+        }
+      })();
+  
+      let currentIndex = 0;
+      let lastTimestamp = 0;
+      const frameInterval = 16.67;  // 60 FPS
+  
+      const animate = (timestamp) => {
+        if (currentIndex >= visitedCells.length) {
+          cancelAnimationFrame(animationFrameId);
+          setPath(finalPath);
+          setIsShowingFinalPath(true);
+          setIsPathfinding(false);
+          return;
+        }
+  
+        // Control frame rate
+        if (timestamp - lastTimestamp < frameInterval) {
+          animationFrameId = requestAnimationFrame(animate);
+          return;
+        }
+  
+        const endIndex = Math.min(currentIndex + cellsPerBatch, visitedCells.length);
+        const newCells = visitedCells.slice(currentIndex, endIndex);
+        
+        setPath(prevPath => [...prevPath, ...newCells]);
+        currentIndex = endIndex;
+        lastTimestamp = timestamp;
+        
+        animationFrameId = requestAnimationFrame(animate);
+      };
+  
+      // Start animation
+      animationFrameId = requestAnimationFrame(animate);
+  
+      // Cleanup function
+      return () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      };
     }
   };
 
