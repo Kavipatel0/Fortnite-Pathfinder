@@ -171,8 +171,8 @@ class Graph {
           let nDist = this.graph[nx][ny] + minDist;
 
           // difference is calculating the heuristic
-          let hScore = Math.max(Math.abs(dst[0] - nx), Math.abs(dst[1] - ny));
-          nDist = this.graph[nx][ny] + minDist + hScore;
+          let hScore = Math.abs(dst[0] - nx) + Math.abs(dst[1] - ny);
+          nDist += hScore;
 
           let nQ = [nx,ny,nDist];
           if (nDist < d[[nx,ny].toString()])
@@ -183,10 +183,11 @@ class Graph {
       }
     }
   }
+
+
 }
 
-export {Graph};
-
+export { Graph };
 
 // console.log("start now");
 // let graph = new Graph(400);

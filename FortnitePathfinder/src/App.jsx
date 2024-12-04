@@ -5,6 +5,9 @@ import {Graph} from './Graph.js';
 import Papa from "papaparse"
 import LoadingScreen from "./Loading Screen";
 import battlebusAnimation from "./assets/Battle Bus Video.mp4";
+import errorIcon from "./assets/Error Icon.png";
+import topRect from "./assets/Rectangle Top.png";
+import bottomRect from "./assets/Rectangle Bottom.png";
 
 
 function App() {
@@ -21,6 +24,12 @@ function App() {
   const [videoPlaying, setVideoPlaying] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef(null);
+  const [showError, setShowError] = useState(false);
+
+  const handleClose = () => {
+    setShowError(false);
+  };
+
 
   const handleVideoEnd = () => {
     setFadeOut(true);
@@ -126,9 +135,11 @@ function App() {
     if (result) {  // Check if we have a result
       if (result[0] === -1) {
         console.log('No path found');
+        setShowError(true);
         setPath([]);
         setIsShowingFinalPath(false);
         setIsPathfinding(false);
+        handleClearMap();
       } else {
         setPath([]);
   
@@ -304,7 +315,7 @@ function App() {
 
           {/* Speed Section */}
           <h2 className="bg-gray-800 h-12 flex items-center justify-center text-3xl font-bold text-yellow-400 tracking-wider drop-shadow-md">
-            Algorithm Speed
+            ALGORITHM SPEED
           </h2>
           <div className="p-4">
             <div className="flex flex-col items-center w-full">
@@ -355,6 +366,24 @@ function App() {
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-hidden">
+          {/* Error message*/}
+          {showError && (
+                <div className="absolute top-1/4 left-1/3 z-10 bg-[rgba(22,19,164,0.80)] flex flex-col items-center justify-center gap-3 px-10 py-4">
+                  <img src={errorIcon} alt="" className="w-8" />
+                  <h1 className="text-5xl text-white">THERE WAS A PROBLEM</h1>
+                  <img src={topRect} alt="" />
+                  <p className="text-xl tracking-wider text-[#5AABFF]">
+                    You cannot place a marker in this spot!
+                  </p>
+                  <img src={bottomRect} alt="" />
+                  <button
+                    className="px-6 py-2 bg-[#FFFB00] text-xl"
+                    onClick={handleClose}
+                  >
+                    Continue
+                  </button>
+                </div>
+              )}
         <Map 
           onGridClick={handleMapClick}
           startPosition={startPosition}
