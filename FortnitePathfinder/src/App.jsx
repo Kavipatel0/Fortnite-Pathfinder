@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { MapPin, Trash2, Check } from 'lucide-react';
 import {Graph} from './Graph.js';
 import Papa from "papaparse"
+import LoadingScreen from "./Loading Screen";
+import battlebusAnimation from "./assets/Battle Bus Video.mp4";
+
 
 function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
@@ -14,8 +17,17 @@ function App() {
   const [isPathfinding, setIsPathfinding] = useState(false);
   const [isShowingFinalPath, setIsShowingFinalPath] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(2);
+  const [notLoaded, setNotLoaded] = useState(true);
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+  const videoRef = useRef(null);
 
-
+  const handleVideoEnd = () => {
+    setFadeOut(true);
+    setTimeout(() => {
+      setVideoPlaying(false);
+    }, 200);
+  };
 
   const readCSV = async () => {
     try {
@@ -51,6 +63,16 @@ function App() {
 
     initializeData();
   }, []);
+
+  useEffect(() => {
+    if (!notLoaded && videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.error('Video playback failed:', error);
+        // Fallback in case video fails to play
+        setVideoPlaying(false);
+      });
+    }
+  }, [notLoaded]);
 
 
 
@@ -145,6 +167,24 @@ function App() {
   };
 
   return (
+    <>
+    {notLoaded ? (
+  <LoadingScreen setNotLoaded={setNotLoaded} />
+    ) : videoPlaying ? (
+      <div className={`fixed inset-0 w-full h-full bg-black ${fadeOut ? "fade-out" : ""}`}>
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          playsInline
+          muted
+          autoPlay
+          onEnded={handleVideoEnd}
+        >
+          <source src={battlebusAnimation} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    ) : (
     <div className="h-screen w-full flex flex-col overflow-hidden">
       <header className="bg-gray-800 flex h-14 items-center justify-center text-center text-4xl text-white tracking-wider shadow-lg">
         Fortnite Pathfinder
@@ -326,6 +366,8 @@ function App() {
         </div>
       </div>
     </div>
+    )}
+    </>
   );
 }
 

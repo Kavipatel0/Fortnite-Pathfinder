@@ -20,3 +20,4 @@
 .custom-slider::-ms-thumb {
   @apply appearance-none w-4 h-4 rounded-full bg-blue-600 cursor-pointer border-0 transition-all duration-150 hover:bg-blue-700 hover:scale-125;
 }
+
