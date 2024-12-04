@@ -75,13 +75,6 @@ function App() {
     setActiveTool(null);
   };
 
-  const getMarkerPositions = () => {
-    if (!startPosition || !endPosition) {
-        return null;
-    }
-
-    return [[startPosition.x, startPosition.y], [endPosition.x, endPosition.y]];
-  };
 
   const speedRef = useRef(animationSpeed);
   useEffect(() => {
@@ -96,11 +89,19 @@ function App() {
     
     const start = [startPosition.x, startPosition.y];
     const end = [endPosition.x, endPosition.y];
+    console.log(selectedAlgorithm);
   
+    let result;
     if (selectedAlgorithm === 'dijkstra') {
-      const result = graph.dijkstra(start, end);
+      result = graph.dijkstra(start, end);
       console.log('Dijkstra Result:', result);
-      
+    }
+    else if (selectedAlgorithm === 'astar') {
+      result = graph.aStar(start, end);
+      console.log('A* Result:', result);
+    }
+  
+    if (result) {  // Check if we have a result
       if (result[0] === -1) {
         console.log('No path found');
         setPath([]);
@@ -117,7 +118,7 @@ function App() {
           switch(speed) {
             case 1: return 15;  // Slow
             case 2: return 25;  // Medium
-            case 3: return 40; // Fast
+            case 3: return 80; // Fast
             default: return 40;
           }
         };

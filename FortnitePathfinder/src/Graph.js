@@ -3,14 +3,14 @@ import PriorityQueue from "js-priority-queue"
 class Graph {
   constructor(n) {
     this.size = n;
-    this.tileType = {"road": 1, "dirt": 12, "Grass": 20, "water": 50, "Obstacle": Infinity};
+    this.tileType = {"road": 1, "dirt": 2, "Grass": 3, "water": 5, "Obstacle": Infinity};
 
     this.graph = [];
     for (let i = 0; i < n; i++) {
       let row = [];
       for (let j = 0; j < n; j++) {
         // default value of 5, grass
-        row.push(20);
+        row.push(3);
       } 
       this.graph.push(row);
     }
@@ -90,6 +90,90 @@ class Graph {
         
         if (nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && this.graph[nx][ny] != Infinity) {
           let nDist = this.graph[nx][ny] + minDist;
+          let nQ = [nx,ny,nDist];
+          if (nDist < d[[nx,ny].toString()])
+            p[[nx,ny].toString()] = [x,y];
+            d[[nx,ny].toString()] = nDist;
+            q.queue(nQ);
+        }
+      }
+    }
+  }
+
+
+  aStar(src, dst) {
+    let checkCoords = [src[0], src[1], dst[0], dst[1]];
+    for (let c of checkCoords) {
+      if (c < 0 || c >= this.size) {
+        return [-1, [-1], [-1]];
+      }
+    }
+    if (this.graph[src[0]][src[1]] === Infinity || this.graph[dst[0]][dst[1]] == Infinity) {
+      return [-1, [-1], [-1]];
+    }
+
+    let output = [-1];
+    let visitedVertices = [];
+    let path = [];
+    let visited = new Set();
+    let q = new PriorityQueue({ comparator: function(coord1, coord2) { return coord1[2] - coord2[2]}});
+    let p = {};
+    let d = {};
+    let nei = [[1,0],[0,1],[-1,0],[0,-1]];
+    for (let i = 0; i < this.size; i++) {
+      for(let j = 0; j < this.size; j++) {
+        p[[i,j].toString()] = [-1,-1];
+        d[[i,j].toString()] = Infinity;
+      }
+    }
+
+    d[src.toString()] = 0;
+    let qSrc = src;
+    qSrc.push(0);
+    q.queue(qSrc);
+
+    while (q.length != 0) {
+      let minCoords = q.dequeue();
+      let minDist = minCoords.pop();
+
+      if (visited.has(minCoords.toString())) {
+        continue;
+      } 
+
+      visited.add(minCoords.toString());
+      visitedVertices.push(minCoords);
+
+      let x = minCoords[0];
+      let y = minCoords[1];
+
+      if (JSON.stringify([x,y]) === JSON.stringify(dst)) {
+        output[0] = d[dst.toString()];
+        output.push(visitedVertices);
+
+        let parent = p[dst.toString()];
+        while (JSON.stringify(parent) !== JSON.stringify([-1,-1])) {
+          path.push(parent);
+          parent = p[parent.toString()];
+        }
+        output.push(path);
+
+        return output;
+      }
+
+      for (let n of nei) {
+        let dx = n[0];
+        let dy = n[1];
+  
+        let nx = x + dx;
+        let ny = y + dy;
+        
+        if (nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && this.graph[nx][ny] != Infinity) {
+          let nDist = this.graph[nx][ny] + minDist;
+
+          // difference is calculating the heuristic
+          let hScore = Math.abs(dst[0] - nx) + Math.abs(dst[1] - ny);
+          nDist += hScore;
+
           let nQ = [nx,ny,nDist];
           if (nDist < d[[nx,ny].toString()])
             p[[nx,ny].toString()] = [x,y];

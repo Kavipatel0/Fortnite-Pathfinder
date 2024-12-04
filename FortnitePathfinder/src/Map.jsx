@@ -29,7 +29,6 @@ function Map({ onGridClick, startPosition, endPosition, activeTool, path = [], i
         path.forEach((coord) => {
             if (Array.isArray(coord) && coord.length === 2) {
                 const [x, y] = coord;
-                // Use blue for final path, yellow for visited cells during animation
                 const color = isShowingFinalPath ? 'rgba(0, 0, 255, 1)' : 'rgba(157, 77, 187, 0.7)';
                 markCellOnCanvas(ctx, x, y, width, color);
             }
