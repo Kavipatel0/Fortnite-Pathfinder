@@ -119,17 +119,19 @@ class Graph {
     let q = new PriorityQueue({ comparator: function(coord1, coord2) { return coord1[2] - coord2[2]}});
     let p = {};
     let d = {};
+    let h = {};
     let nei = [[1,0],[0,1],[-1,0],[0,-1]];
     for (let i = 0; i < this.size; i++) {
       for(let j = 0; j < this.size; j++) {
         p[[i,j].toString()] = [-1,-1];
         d[[i,j].toString()] = Infinity;
+        h[[i,j].toString()] = (Math.abs(dst[0] - i) + Math.abs(dst[1] - j));
       }
     }
 
     d[src.toString()] = 0;
     let qSrc = src;
-    qSrc.push(0);
+    qSrc.push(h[src.toString()]);
     q.queue(qSrc);
 
     while (q.length != 0) {
@@ -168,17 +170,18 @@ class Graph {
         let ny = y + dy;
         
         if (nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && this.graph[nx][ny] != Infinity) {
-          let nDist = this.graph[nx][ny] + minDist;
+          let nDist = this.graph[nx][ny] + d[minCoords.toString()];
 
           // difference is calculating the heuristic
-          let hScore = Math.abs(dst[0] - nx) + Math.abs(dst[1] - ny);
+          let hScore = h[[nx,ny].toString()];
           nDist += hScore;
 
           let nQ = [nx,ny,nDist];
-          if (nDist < d[[nx,ny].toString()])
+          if (nDist < d[[nx,ny].toString()]) {
             p[[nx,ny].toString()] = [x,y];
-            d[[nx,ny].toString()] = nDist;
+            d[[nx,ny].toString()] = (nDist - hScore);
             q.queue(nQ);
+          }
         }
       }
     }
